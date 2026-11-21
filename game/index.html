@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="HARBOUR HUNT — a spot the difference game: 5 harbours, 40 changes.">
+<link rel="icon" href="data:,">
+<title>HARBOUR HUNT — Spot the Difference</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- A. Start screen -->
+  <section class="screen" id="screen-start">
+    <canvas id="start-bg" width="1280" height="800"></canvas>
+    <div class="start-inner">
+      <div class="start-top">
+        <figure class="vs-mini">
+          <canvas id="preview-left" width="200" height="140"></canvas>
+          <figcaption>ORIGINAL</figcaption>
+        </figure>
+        <div class="title-block">
+          <h1>HARBOUR HUNT</h1>
+          <p class="subtitle">Spot the Difference · 5 Harbours · <span id="total-changes">40</span> Changes</p>
+        </div>
+        <figure class="vs-mini">
+          <canvas id="preview-right" width="200" height="140"></canvas>
+          <figcaption>CHANGED</figcaption>
+        </figure>
+      </div>
+      <button class="btn btn-big btn-amber" id="btn-start">▶ START HUNT</button>
+      <div class="start-row">
+        <button class="btn btn-amber" id="btn-levels-start">Levels</button>
+        <button class="btn btn-amber" id="btn-howto">How to Play</button>
+      </div>
+      <p class="feature-line">3 Hearts · 3 Hints · Magnifier · Keyboard</p>
+      <p class="keys-line">Arrows move · Enter clicks · H hint · P pause · M magnifier</p>
+    </div>
+    <button class="btn-icon" id="btn-sound-start" aria-label="Sound on or off">🔊</button>
+  </section>
+
+  <!-- H. Levels map -->
+  <section class="screen overlay" id="screen-levels">
+    <h2 class="screen-title">HARBOUR MAP</h2>
+    <p class="screen-sub">Pick a harbour you have unlocked. Clear one to open the next.</p>
+    <div class="levels-grid" id="levels-grid"></div>
+    <button class="btn btn-amber" id="btn-levels-back">← Back</button>
+  </section>
+
+  <!-- How to play -->
+  <section class="screen overlay" id="screen-howto">
+    <h2 class="screen-title">HOW TO PLAY</h2>
+    <div class="howto-body">
+      <p>Two pictures of the same harbour sit side by side. The right one hides <b>8 changes</b>. Find them all before the hearts run out.</p>
+      <p>Click a difference on <b>either</b> panel — left and right count the same. A right click rings it green on both panels. A wrong click costs one heart.</p>
+      <p>Finds in a row within 5 seconds raise your combo: ×2, ×3, up to ×4. A wrong click breaks it.</p>
+      <p>Finish under the par time with hearts to spare for 3 stars. A hint costs you a star.</p>
+      <p>Keyboard: arrows move the square cursor, Enter or Space clicks, H hints, P pauses, M magnifies.</p>
+    </div>
+    <button class="btn btn-amber" id="btn-howto-back">← Back</button>
+  </section>
+
+  <!-- B. Gameplay -->
+  <section class="screen" id="screen-game">
+    <header class="hud">
+      <div class="hud-left">
+        <div class="hud-scene" id="hud-scene-name">Dawn Harbour</div>
+        <div class="hud-meta" id="hud-scene-meta">Scene 1 of 5 · Par 1:30</div>
+      </div>
+      <div class="hud-center"><span id="hud-tofind">8 to find</span></div>
+      <div class="hud-right">
+        <div class="hud-timer" id="hud-timer">0:00</div>
+        <div class="hud-hearts" id="hud-hearts">♥♥♥</div>
+        <div class="hud-score" id="hud-score">Score 0 · ×1</div>
+      </div>
+    </header>
+    <div class="btn-row">
+      <button class="btn btn-pill" id="btn-hint">💡 Hint (<span id="btn-hint-count">3</span>)</button>
+      <button class="btn btn-pill" id="btn-magnifier">🔍 Magnifier</button>
+      <button class="btn btn-pill" id="btn-pause">⏸ Pause</button>
+      <button class="btn btn-pill" id="btn-sound">🔊 Sound</button>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-label">LEFT: original</div>
+        <div class="panel-wrap">
+          <canvas id="panel-left"></canvas>
+          <div class="lens" id="lens-left"><canvas width="150" height="150"></canvas></div>
+        </div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="panel">
+        <div class="panel-label">RIGHT: spot the changes</div>
+        <div class="panel-wrap">
+          <canvas id="panel-right"></canvas>
+          <div class="lens" id="lens-right"><canvas width="150" height="150"></canvas></div>
+          <div id="kbd-cursor"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="bottom-bar">
+      <div class="found"><span>Found:</span><span id="found-dots"></span></div>
+      <div class="streak" id="hud-streak">Streak ×1</div>
+    </footer>
+  </section>
+
+  <!-- C. Pause -->
+  <section class="screen overlay" id="screen-pause">
+    <h2 class="screen-title">PAUSED</h2>
+    <p class="screen-sub" id="pause-meta">Scene 1 of 5 · 0:00 · ♥♥♥ · Hints 3</p>
+    <div class="stack">
+      <button class="btn btn-big btn-amber" id="btn-resume">▶ Resume</button>
+      <button class="btn btn-amber" id="btn-restart-scene">↺ Restart Scene</button>
+      <button class="btn btn-amber" id="btn-levels-pause">Levels</button>
+      <button class="btn btn-amber" id="btn-restart-open">↺ Restart Run</button>
+      <button class="btn btn-pill" id="btn-sound-pause">🔊 Sound</button>
+    </div>
+  </section>
+
+  <!-- D. Scene clear -->
+  <section class="screen overlay" id="screen-clear">
+    <h2 class="screen-title screen-title-green" id="clear-title">HARBOUR CLEARED!</h2>
+    <div class="stars-big" id="clear-stars">★★★</div>
+    <div class="stats" id="clear-stats"></div>
+    <button class="btn btn-big btn-amber" id="btn-next">NEXT →</button>
+    <button class="btn btn-amber" id="btn-replay">↺ Replay</button>
+  </section>
+
+  <!-- E. Game over -->
+  <section class="screen overlay" id="screen-gameover">
+    <h2 class="screen-title screen-title-red">OUT OF HEARTS</h2>
+    <p class="screen-sub" id="gameover-meta">Dawn Harbour · 5 differences left</p>
+    <div class="stack">
+      <button class="btn btn-big btn-amber" id="btn-tryagain">↺ TRY AGAIN</button>
+      <button class="btn btn-amber" id="btn-levels-over">Levels</button>
+    </div>
+  </section>
+
+  <!-- F. Final -->
+  <section class="screen overlay" id="screen-final">
+    <h2 class="screen-title screen-title-gold">HARBOUR MASTER!</h2>
+    <div class="final-score" id="final-score">0</div>
+    <p class="screen-sub" id="final-time">Total time 0:00</p>
+    <p class="screen-sub" id="final-stars">0 / 15 ★</p>
+    <div class="final-cards" id="final-cards"></div>
+    <button class="btn btn-big btn-amber" id="btn-again">▶ PLAY AGAIN</button>
+    <button class="btn btn-amber" id="btn-levels-final">Levels</button>
+  </section>
+
+  <!-- G. Restart confirm -->
+  <section class="screen overlay" id="screen-restart">
+    <h2 class="screen-title">Restart from the beginning?</h2>
+    <p class="screen-sub">Your score, hearts and hints reset to zero.</p>
+    <div class="stack">
+      <button class="btn btn-big btn-amber" id="btn-restart-yes">Yes, restart</button>
+      <button class="btn btn-amber" id="btn-restart-no">Keep playing</button>
+    </div>
+  </section>
+
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
